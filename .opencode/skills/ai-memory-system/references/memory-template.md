@@ -2,9 +2,10 @@
 
 ## Meta
 - Date: YYYY-MM-DD
-- Time: HH:MM
+- Time: HH:MM (24h)
 - Type: feature | fix | refactor | decision | bug | infra
 - Scope: file/module/system affected
+- Tags: kebab-case, comma-separated (e.g. auth, jwt, api)
 
 ## Context
 Brief description of the problem or situation.

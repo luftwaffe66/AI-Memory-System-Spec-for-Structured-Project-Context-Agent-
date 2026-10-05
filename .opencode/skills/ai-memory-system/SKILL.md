@@ -6,7 +6,7 @@ compatibility: opencode, claude, agents
 metadata:
   audience: ai-agents
   workflow: project-memory
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # AI Memory System
@@ -62,10 +62,13 @@ Evaluate → Create → Sync → Verify. If skipped, the task is **incomplete**.
 **Step 1 — Evaluate:** Does the task match "When to use me" above? If no, stop.
 
 **Step 2 — Create file:** `memory/YYYY-MM-DD_HH-MM_<slug>.md`
-- Date/time = now, in 24h local time (e.g. `2026-10-04_22-31_auth-refactor.md`)
-- Slug = kebab-case, short, descriptive (`auth-jwt-migration`, `db-schema-v2`)
+- Fastest way (recommended): `bash scripts/new-memory.sh --slug <kebab> --type <type> --scope <module> --title "<Title>" --tags <a,b> --template <memory|decision|bug|refactor>`
+  - Auto-fills date/time, scaffolds from the right template, and syncs `index.md`
+- Manual fallback:
+  - Date/time = now, in 24h local time (e.g. `2026-10-04_22-31_auth-refactor.md`)
+  - Slug = kebab-case, short, descriptive (`auth-jwt-migration`, `db-schema-v2`)
 - Max **200 lines** — if exceeded, shard into `...-part-1.md`, `...-part-2.md`
-- Use exact template from `references/memory-template.md`
+- Templates: `references/memory-template.md` (default), `references/decision-template.md` (Type: decision, with Status/Supersedes), `references/bug-template.md` (Type: bug, with Severity), `references/refactor-template.md` (Type: refactor)
 - Forbidden: empty text, placeholders, `TBD`, `later`, `pending` without context
 - Everything must be concrete, verifiable, useful for debugging/audit
 
@@ -81,11 +84,17 @@ Evaluate → Create → Sync → Verify. If skipped, the task is **incomplete**.
 - Every entry must point to a real file. Full example in `references/index-template.md`.
 
 **Step 4 — Verify:**
-- Run `bash scripts/validate-memory.sh` (or manually check):
+- Run `bash scripts/validate-memory.sh --root .` (strict mode is ON by default):
   - `memory/index.md` exists and is sorted descending
-  - no duplicates, no dead links
-  - filenames match `^[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}-[0-9]{2}_[a-z0-9-]+\.md$`
+  - no duplicates, no dead links, no orphans
+  - filenames match `^[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}-[0-9]{2}_[a-z0-9-]+\.md$` with valid date/time
+  - Meta Date/Time match the filename (warning if drifted)
   - every file ≤ 200 lines
+  - required Meta fields: `Date, Time, Type, Scope, Tags` (+ `Status` for decision, `Severity` for bug)
+  - valid `Type: feature | fix | refactor | decision | bug | infra`
+  - required sections: `Context, Action, Result, Impact`
+  - no placeholder-only lines (`TBD`, `TODO`, `later`, `pending`)
+- Use `--no-strict` to skip content checks (structure only).
 
 ## Base structure
 
@@ -111,9 +120,10 @@ EOF
 
 ## Meta
 - Date: YYYY-MM-DD
-- Time: HH:MM
+- Time: HH:MM (24h)
 - Type: feature | fix | refactor | decision | bug | infra
 - Scope: file/module/system affected
+- Tags: kebab-case, comma-separated (e.g. auth, jwt, api)
 
 ## Context
 Brief description of the problem or situation.
@@ -131,7 +141,7 @@ How this affects the system or future decisions.
 Pending items or detected risks.
 ```
 
-> Full copy-paste templates: see `references/memory-template.md` and `references/index-template.md`.
+> Full copy-paste templates: `references/memory-template.md` (default), `references/decision-template.md`, `references/bug-template.md`, `references/refactor-template.md`, plus `references/index-template.md`.
 
 ## Type field guide
 
