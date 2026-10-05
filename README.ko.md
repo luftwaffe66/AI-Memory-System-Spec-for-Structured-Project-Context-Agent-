@@ -7,10 +7,10 @@
 [![Enforcement](https://img.shields.io/badge/enforcement-strict-critical?style=for-the-badge)](#-강제-규칙)
 [![License](https://img.shields.io/badge/license-use_freely-green?style=for-the-badge)](#-목표)
 
-**AI 세션 사이에 컨텍스트를 잃지 마세요.** 이 저장소는 인덱싱되고 타임스탬프가 있는 Markdown 파일들로 구성된 `/memory/` 디렉토리 기반의 결정적이고 감사 가능한 장기 메모리 계층을 정의합니다.
+**AI 세션 사이에 컨텍스트를 잃지 마세요.** 이 저장소는 인덱싱되고 타임스탬프가 있는 Markdown 파일들로 구성된 `/memory/` 디렉토리 기반의 결정적이고 감사 가능한 장기 메모리 계층을 정의합니다. 여기에 모든 프로젝트·저장소·세션에서 함께 하는 공유 **글로벌 메모리**(`~/.agents/memory/`)가 더해집니다.
 
 📖 전체 규범 명세 → [`memory.md`](./memory.md)
-⚡ 재사용 가능한 에이전트 스킬 → [`.opencode/skills/ai-memory-system/SKILL.md`](./.opencode/skills/ai-memory-system/SKILL.md)
+⚡ 재사용 가능한 에이전트 스킬(`ai-memory-system`) → [`.agents/skills/ai-memory-system/SKILL.md`](./.agents/skills/ai-memory-system/SKILL.md)——**Codex, Claude Code, OpenCode, Gemini CLI, Cursor** 지원.
 
 <!-- README-I18N:START -->
 [English](./README.md) | [Español](./README.es.md) | [Português](./README.pt.md) | [Français](./README.fr.md) | [Deutsch](./README.de.md) | [简体中文](./README.zh.md) | [日本語](./README.ja.md) | **한국어** | [Русский](./README.ru.md) | [العربية](./README.ar.md)
@@ -22,6 +22,7 @@
 
 - [✨ 왜 필요한가](#-왜-필요한가)
 - [💡 핵심 개념](#-핵심-개념)
+- [🌍 프로젝트 vs 글로벌 메모리](#-프로젝트-vs-글로벌-메모리)
 - [📏 메모리 규칙](#-메모리-규칙)
 - [🧾 메모리 파일 형식](#-메모리-파일-형식)
 - [📌 메모리를 생성하는 시점](#-메모리를-생성하는-시점)
@@ -43,6 +44,7 @@
 | 🔧 **리팩터** | 리팩터와 시스템 변경을 기록 |
 | 📜 **히스토리** | 구조화되고 타임스탬프가 있는 프로젝트 히스토리 유지 |
 | 🔁 **재현성** | 재현성과 추적 가능성 보장 |
+| 🌍 **공유 메모리** | 글로벌 저장소(`~/.agents/memory/`)가 **모든** 프로젝트·저장소에서 학습을 재사용 |
 
 > *“왜 이렇게 했더라?”*는 이제 그만—모든 중요한 변경은 문서화되고, 인덱싱되며, 검색 가능합니다.
 
@@ -66,6 +68,25 @@
 
 - **`index.md`** → 글로벌 메모리 인덱스, **유일한 진실 공급원**
 - **`*.md` 파일** → 개별 원자적 메모리 항목
+
+---
+
+## 🌍 프로젝트 vs 글로벌 메모리
+
+두 개의 계층이 있습니다. 에이전트는 항상 **둘 다** 읽습니다:
+
+| 계층 | 위치 | 내용 |
+|-------|----------|----------|
+| 📁 프로젝트 | 각 저장소의 `./memory/` | 저장소별: 이 저장소의 아키텍처·리팩터·버그 |
+| 🌍 글로벌 | `~/.agents/memory/` | **모든** 저장소/세션에서 공유: 재사용 가능한 결정·패턴·선호 |
+
+**라우팅 규칙:** 저장소별 → 프로젝트(기본). 다른 곳에서 재사용 가능 → 글로벌(`new-memory.sh --global`). 모호하면 → 프로젝트.
+
+둘을 한 번에 검색:
+
+```bash
+bash $SKILL_DIR/scripts/search-memory.sh <keyword> --root .
+```
 
 ---
 
@@ -138,6 +159,8 @@ Risks or pending tasks.
 - 🚫 금지: 빈 텍스트, 플레이스홀더, 맥락 없는 `TBD`·`later`·`pending`
 - ✅ 모든 내용은 **구체적이고 검증 가능하며** 향후 디버깅/감사에 유용해야 함
 
+> 기성 템플릿(메모리·결정·버그·리팩터·인덱스)은 스킬의 `references/` 폴더에 있습니다.
+
 ---
 
 ## 📌 메모리를 생성하는 시점
@@ -205,53 +228,51 @@ EOF
 - [ ] 파일명이 `YYYY-MM-DD_HH-MM_<slug>.md`를 따르는가?
 - [ ] 파일이 200줄 이하인가?
 - [ ] `index.md`가 업데이트되고 내림차순으로 정렬되었는가?
+- [ ] 다른 저장소에서도 재사용 가능한가? → `new-memory.sh --global`로 글로벌 저장(`~/.agents/memory/`에 저장)
 
 ---
 
 ## 🤖 스킬로 설치
 
-이 저장소는 바로 사용할 수 있는 **OpenCode / Claude / Agents 스킬**이기도 합니다 (`ai-memory-system`).
+이 저장소는 바로 사용할 수 있는 **멀티 에이전트 스킬**(`ai-memory-system`)입니다——**Codex, Claude Code, OpenCode, Gemini CLI, Cursor** 지원(Agent Skills 표준: `SKILL.md`).
+
+**구성**(`.agents/`가 정본——미러를 직접 편집하지 마세요):
 
 ```
-.opencode/skills/ai-memory-system/
-├── SKILL.md                      ← skill definition (frontmatter + workflow)
-├── references/
-│   ├── memory-template.md        ← copy-paste memory file template
-│   └── index-template.md         ← copy-paste index.md example
-└── scripts/
-    └── validate-memory.sh        ← integrity checker
+.agents/skills/ai-memory-system/     ← canonical (Codex, Gemini alias, OpenCode)
+.claude/skills/ai-memory-system/     ← mirror (Claude Code)
+.gemini/skills/ai-memory-system/     ← mirror (Gemini CLI)
+.opencode/skills/ai-memory-system/   ← mirror (OpenCode)
+├── SKILL.md                         ← skill definition (Recall → Act → Persist)
+├── references/                      ← memory, decision, bug, refactor, index templates
+└── scripts/                         ← new-memory, validate-memory, search-memory, install-global, sync-vendors
 ```
 
-**프로젝트에서 사용:**
+**글로벌 설치(권장——*모든* 프로젝트에서 스킬 + `/memory`):**
 
 ```bash
-# Option A — copy into your project (OpenCode)
-mkdir -p .opencode/skills
-cp -r /path/to/this-repo/.opencode/skills/ai-memory-system .opencode/skills/
-
-# Option B — global install (all projects)
-mkdir -p ~/.config/opencode/skills
-cp -r /path/to/this-repo/.opencode/skills/ai-memory-system ~/.config/opencode/skills/
-
-# Claude-compatible paths also work:
-# .claude/skills/ , ~/.claude/skills/ , .agents/skills/ , ~/.agents/skills/
+bash .agents/skills/ai-memory-system/scripts/install-global.sh --force
+# Restart your agent, then type /memory anywhere
 ```
+
+스킬을 `~/.agents/skills/`, `~/.claude/skills/`, `~/.gemini/skills/`, `~/.config/opencode/skills/`, `~/.cursor/skills/`에, `/memory` 명령을 OpenCode / Claude / Gemini용으로 설치하고, 공유 `~/.agents/memory/` 저장소를 생성합니다.
+
+**프로젝트별(이 저장소만):** `.agents/skills/ai-memory-system`을 에이전트의 스킬 디렉토리에 복사——전체 경로는 `AGENTS.md` §3 참조.
+
+**슬래시 명령:**
+
+- `/memory` → 회상(프로젝트 + 글로벌)
+- `/memory save <설명>` → 영속화(프로젝트 vs 글로벌로 라우팅)
 
 **설치 후 검증:**
 
 ```bash
-bash .opencode/skills/ai-memory-system/scripts/validate-memory.sh --root .
-# ✅ memory/ and index.md exist
+bash $SKILL_DIR/scripts/validate-memory.sh --root .                  # project memory
+bash $SKILL_DIR/scripts/validate-memory.sh --memdir ~/.agents/memory # global memory
 # ✅ memory system is valid
 ```
 
-설치 후 에이전트는 `skill` 도구를 통해 자동으로 감지합니다:
-
-```
-skill({ name: "ai-memory-system" })
-```
-
-> 이 스킬은 전체 [`memory.md`](./memory.md) 명세를 템플릿과 검증이 포함된 회상 → 실행 → 영속화 워크플로로 감싼 것입니다.
+> 이 스킬은 전체 [`memory.md`](./memory.md) 명세를 템플릿과 검증이 포함된 회상 → 실행 → 영속화 워크플로로 감싼 것입니다. 에이전트용 안내: [`AGENTS.md`](./AGENTS.md)。
 
 ---
 

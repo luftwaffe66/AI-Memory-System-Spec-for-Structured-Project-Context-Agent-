@@ -7,10 +7,10 @@
 [![Enforcement](https://img.shields.io/badge/enforcement-strict-critical?style=for-the-badge)](#-regra-de-cumprimento)
 [![License](https://img.shields.io/badge/license-use_freely-green?style=for-the-badge)](#-objetivo)
 
-**Pare de perder contexto entre sessões de IA.** Este repo define uma camada de memória determinística, auditável e de longo prazo baseada em um diretório `/memory/` com arquivos Markdown indexados e com marcação de tempo.
+**Pare de perder contexto entre sessões de IA.** Este repo define uma camada de memória determinística, auditável e de longo prazo baseada em um diretório `/memory/` com arquivos Markdown indexados e com marcação de tempo — mais uma **memória global** compartilhada (`~/.agents/memory/`) que acompanha você em cada projeto, repo e sessão.
 
 📖 Especificação normativa completa → [`memory.md`](./memory.md)
-⚡ Skill reutilizável para agentes → [`.opencode/skills/ai-memory-system/SKILL.md`](./.opencode/skills/ai-memory-system/SKILL.md)
+⚡ Skill reutilizável para agentes (`ai-memory-system`) → [`.agents/skills/ai-memory-system/SKILL.md`](./.agents/skills/ai-memory-system/SKILL.md) — funciona com **Codex, Claude Code, OpenCode, Gemini CLI, Cursor**.
 
 <!-- README-I18N:START -->
 [English](./README.md) | [Español](./README.es.md) | **Português** | [Français](./README.fr.md) | [Deutsch](./README.de.md) | [简体中文](./README.zh.md) | [日本語](./README.ja.md) | [한국어](./README.ko.md) | [Русский](./README.ru.md) | [العربية](./README.ar.md)
@@ -22,6 +22,7 @@
 
 - [✨ Por que existe](#-por-que-existe)
 - [💡 Conceito central](#-conceito-central)
+- [🌍 Memória de projeto vs global](#-memória-de-projeto-vs-global)
 - [📏 Regras de memória](#-regras-de-memória)
 - [🧾 Formato do arquivo de memória](#-formato-do-arquivo-de-memória)
 - [📌 Quando criar memória](#-quando-criar-memória)
@@ -43,6 +44,7 @@ Agentes de IA modernos perdem contexto entre sessões. Este sistema resolve isso
 | 🔧 **Refactors** | Registra refactors e mudanças do sistema |
 | 📜 **Histórico** | Mantém um histórico de projeto estruturado e com marcação de tempo |
 | 🔁 **Reprodutibilidade** | Permite reprodutibilidade e rastreabilidade |
+| 🌍 **Memória compartilhada** | Armazenamento global (`~/.agents/memory/`) reutiliza aprendizados em TODOS os projetos e repos |
 
 > Chega de *"por que fizemos assim?"* — cada mudança importante está documentada, indexada e pesquisável.
 
@@ -66,6 +68,25 @@ Ela é composta de:
 
 - **`index.md`** → índice global de memória, a **única fonte da verdade**
 - **arquivos `*.md`** → entradas de memória individuais e atômicas
+
+---
+
+## 🌍 Memória de projeto vs global
+
+Duas camadas. O agente sempre lê **ambas**:
+
+| Camada | Localização | Conteúdo |
+|-------|----------|----------|
+| 📁 PROJETO | `./memory/` em cada repo | Específico do repo: arquitetura, refactors, bugs deste repo |
+| 🌍 GLOBAL | `~/.agents/memory/` | Compartilhado entre TODOS os repos/sessões: decisões, padrões e preferências reutilizáveis |
+
+**Regra de roteamento:** específico do repo → PROJETO (padrão). Reutilizável em outro lugar → GLOBAL (`new-memory.sh --global`). Na dúvida → PROJETO.
+
+Busque em ambas de uma vez:
+
+```bash
+bash $SKILL_DIR/scripts/search-memory.sh <keyword> --root .
+```
 
 ---
 
@@ -138,6 +159,8 @@ Risks or pending tasks.
 - 🚫 Proibido: texto vazio, placeholders, `TBD`, `later`, `pending` sem contexto
 - ✅ Tudo deve ser **concreto, verificável e útil** para depurações / auditorias futuras
 
+> Modelos prontos (memória, decisão, bug, refactor, índice) na pasta `references/` do skill.
+
 ---
 
 ## 📌 Quando criar memória
@@ -205,53 +228,51 @@ EOF
 - [ ] O nome segue `YYYY-MM-DD_HH-MM_<slug>.md`?
 - [ ] O arquivo tem ≤ 200 linhas?
 - [ ] `index.md` atualizado e ordenado de forma decrescente?
+- [ ] Reutilizável em outros repos? → salve globalmente com `new-memory.sh --global` (vai para `~/.agents/memory/`)
 
 ---
 
 ## 🤖 Instalar como skill
 
-Este repo também é um **skill pronto para OpenCode / Claude / Agents** (`ai-memory-system`).
+Este repo é um **skill multi-agente** pronto para uso (`ai-memory-system`) para **Codex, Claude Code, OpenCode, Gemini CLI, Cursor** (padrão Agent Skills: `SKILL.md`).
+
+**Estrutura** (`.agents/` é canônico — nunca edite um espelho diretamente):
 
 ```
-.opencode/skills/ai-memory-system/
-├── SKILL.md                      ← skill definition (frontmatter + workflow)
-├── references/
-│   ├── memory-template.md        ← copy-paste memory file template
-│   └── index-template.md         ← copy-paste index.md example
-└── scripts/
-    └── validate-memory.sh        ← integrity checker
+.agents/skills/ai-memory-system/     ← canonical (Codex, Gemini alias, OpenCode)
+.claude/skills/ai-memory-system/     ← mirror (Claude Code)
+.gemini/skills/ai-memory-system/     ← mirror (Gemini CLI)
+.opencode/skills/ai-memory-system/   ← mirror (OpenCode)
+├── SKILL.md                         ← skill definition (Recall → Act → Persist)
+├── references/                      ← memory, decision, bug, refactor, index templates
+└── scripts/                         ← new-memory, validate-memory, search-memory, install-global, sync-vendors
 ```
 
-**Use no seu projeto:**
+**Instalação global (recomendado — skill + `/memory` em CADA projeto):**
 
 ```bash
-# Option A — copy into your project (OpenCode)
-mkdir -p .opencode/skills
-cp -r /path/to/this-repo/.opencode/skills/ai-memory-system .opencode/skills/
-
-# Option B — global install (all projects)
-mkdir -p ~/.config/opencode/skills
-cp -r /path/to/this-repo/.opencode/skills/ai-memory-system ~/.config/opencode/skills/
-
-# Claude-compatible paths also work:
-# .claude/skills/ , ~/.claude/skills/ , .agents/skills/ , ~/.agents/skills/
+bash .agents/skills/ai-memory-system/scripts/install-global.sh --force
+# Restart your agent, then type /memory anywhere
 ```
+
+Instala o skill em `~/.agents/skills/`, `~/.claude/skills/`, `~/.gemini/skills/`, `~/.config/opencode/skills/`, `~/.cursor/skills/`, o comando `/memory` para OpenCode / Claude / Gemini, e cria o armazenamento compartilhado `~/.agents/memory/`.
+
+**Por projeto (somente este repo):** copie `.agents/skills/ai-memory-system` para o diretório de skills do seu agente — veja `AGENTS.md` §3 para todos os caminhos.
+
+**Comando slash:**
+
+- `/memory` → lembrar (projeto + global)
+- `/memory save <descrição>` → persistir (roteia PROJETO vs GLOBAL)
 
 **Valide após instalar:**
 
 ```bash
-bash .opencode/skills/ai-memory-system/scripts/validate-memory.sh --root .
-# ✅ memory/ and index.md exist
+bash $SKILL_DIR/scripts/validate-memory.sh --root .                  # project memory
+bash $SKILL_DIR/scripts/validate-memory.sh --memdir ~/.agents/memory # global memory
 # ✅ memory system is valid
 ```
 
-Uma vez instalado, o agente o descobre automaticamente via a ferramenta `skill`:
-
-```
-skill({ name: "ai-memory-system" })
-```
-
-> O skill encapsula a especificação completa [`memory.md`](./memory.md) em um fluxo Lembrar → Agir → Persistir com modelos e validação.
+> O skill encapsula a especificação completa [`memory.md`](./memory.md) em um fluxo Lembrar → Agir → Persistir com modelos e validação. Instruções para agentes: [`AGENTS.md`](./AGENTS.md).
 
 ---
 

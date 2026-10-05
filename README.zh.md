@@ -7,10 +7,10 @@
 [![Enforcement](https://img.shields.io/badge/enforcement-strict-critical?style=for-the-badge)](#-执行规则)
 [![License](https://img.shields.io/badge/license-use_freely-green?style=for-the-badge)](#-目标)
 
-**不再在 AI 会话之间丢失上下文。** 本仓库基于 `/memory/` 目录，通过带索引、带时间戳的 Markdown 文件，定义了一个确定性的、可审计的长期记忆层。
+**不再在 AI 会话之间丢失上下文。** 本仓库基于 `/memory/` 目录，通过带索引、带时间戳的 Markdown 文件，定义了一个确定性的、可审计的长期记忆层——外加一个共享的**全局记忆**（`~/.agents/memory/`），在每个项目、仓库和会话中跟随你。
 
 📖 完整规范 → [`memory.md`](./memory.md)
-⚡ 可复用的 Agent 技能 → [`.opencode/skills/ai-memory-system/SKILL.md`](./.opencode/skills/ai-memory-system/SKILL.md)
+⚡ 可复用的 Agent 技能（`ai-memory-system`）→ [`.agents/skills/ai-memory-system/SKILL.md`](./.agents/skills/ai-memory-system/SKILL.md)——适用于 **Codex、Claude Code、OpenCode、Gemini CLI、Cursor**。
 
 <!-- README-I18N:START -->
 [English](./README.md) | [Español](./README.es.md) | [Português](./README.pt.md) | [Français](./README.fr.md) | [Deutsch](./README.de.md) | **简体中文** | [日本語](./README.ja.md) | [한국어](./README.ko.md) | [Русский](./README.ru.md) | [العربية](./README.ar.md)
@@ -22,6 +22,7 @@
 
 - [✨ 为什么需要它](#-为什么需要它)
 - [💡 核心概念](#-核心概念)
+- [🌍 项目记忆与全局记忆](#-项目记忆与全局记忆)
 - [📏 记忆规则](#-记忆规则)
 - [🧾 记忆文件格式](#-记忆文件格式)
 - [📌 何时创建记忆](#-何时创建记忆)
@@ -43,6 +44,7 @@
 | 🔧 **重构** | 记录重构和系统变更 |
 | 📜 **历史** | 维护结构化的、带时间戳的项目历史 |
 | 🔁 **可复现性** | 实现可复现性和可追溯性 |
+| 🌍 **共享记忆** | 全局存储（`~/.agents/memory/`），在**所有**项目和仓库中复用经验 |
 
 > 不再有*“我们当时为什么这样做？”*——每一项重要变更都有文档、可索引、可搜索。
 
@@ -66,6 +68,25 @@
 
 - **`index.md`** → 全局记忆索引，**唯一的事实来源**
 - **`*.md` 文件** → 独立的、原子的记忆条目
+
+---
+
+## 🌍 项目记忆与全局记忆
+
+两层。智能体始终读取**两者**：
+
+| 层 | 位置 | 内容 |
+|-------|----------|----------|
+| 📁 项目 | 每个仓库的 `./memory/` | 仓库专属：本仓库的架构、重构、缺陷 |
+| 🌍 全局 | `~/.agents/memory/` | 在**所有**仓库/会话间共享：可复用的决策、模式和偏好 |
+
+**路由规则：** 仓库专属 → 项目（默认）。别处可复用 → 全局（`new-memory.sh --global`）。不确定 → 项目。
+
+同时搜索两者：
+
+```bash
+bash $SKILL_DIR/scripts/search-memory.sh <keyword> --root .
+```
 
 ---
 
@@ -138,6 +159,8 @@ Risks or pending tasks.
 - 🚫 禁止：空文本、占位符、无上下文的 `TBD`、`later`、`pending`
 - ✅ 所有内容必须**具体、可验证、有用**，便于未来的调试/审计
 
+> 现成的模板（记忆、决策、缺陷、重构、索引）位于技能的 `references/` 文件夹中。
+
 ---
 
 ## 📌 何时创建记忆
@@ -205,53 +228,51 @@ EOF
 - [ ] 文件名符合 `YYYY-MM-DD_HH-MM_<slug>.md`？
 - [ ] 文件 ≤ 200 行？
 - [ ] `index.md` 已更新并按降序排列？
+- [ ] 可在其他仓库复用？→ 用 `new-memory.sh --global` 全局保存（存入 `~/.agents/memory/`）
 
 ---
 
 ## 🤖 作为技能安装
 
-本仓库也是一个开箱即用的 **OpenCode / Claude / Agents 技能**（`ai-memory-system`）。
+本仓库是一个开箱即用的**多智能体技能**（`ai-memory-system`），适用于 **Codex、Claude Code、OpenCode、Gemini CLI、Cursor**（Agent Skills 标准：`SKILL.md`）。
+
+**布局**（`.agents/` 为权威来源——切勿直接编辑镜像）：
 
 ```
-.opencode/skills/ai-memory-system/
-├── SKILL.md                      ← skill definition (frontmatter + workflow)
-├── references/
-│   ├── memory-template.md        ← copy-paste memory file template
-│   └── index-template.md         ← copy-paste index.md example
-└── scripts/
-    └── validate-memory.sh        ← integrity checker
+.agents/skills/ai-memory-system/     ← canonical (Codex, Gemini alias, OpenCode)
+.claude/skills/ai-memory-system/     ← mirror (Claude Code)
+.gemini/skills/ai-memory-system/     ← mirror (Gemini CLI)
+.opencode/skills/ai-memory-system/   ← mirror (OpenCode)
+├── SKILL.md                         ← skill definition (Recall → Act → Persist)
+├── references/                      ← memory, decision, bug, refactor, index templates
+└── scripts/                         ← new-memory, validate-memory, search-memory, install-global, sync-vendors
 ```
 
-**在你的项目中使用：**
+**全局安装（推荐——在*每个*项目中使用 skill + `/memory`）：**
 
 ```bash
-# Option A — copy into your project (OpenCode)
-mkdir -p .opencode/skills
-cp -r /path/to/this-repo/.opencode/skills/ai-memory-system .opencode/skills/
-
-# Option B — global install (all projects)
-mkdir -p ~/.config/opencode/skills
-cp -r /path/to/this-repo/.opencode/skills/ai-memory-system ~/.config/opencode/skills/
-
-# Claude-compatible paths also work:
-# .claude/skills/ , ~/.claude/skills/ , .agents/skills/ , ~/.agents/skills/
+bash .agents/skills/ai-memory-system/scripts/install-global.sh --force
+# Restart your agent, then type /memory anywhere
 ```
+
+它会将技能安装到 `~/.agents/skills/`、`~/.claude/skills/`、`~/.gemini/skills/`、`~/.config/opencode/skills/`、`~/.cursor/skills/`，为 OpenCode / Claude / Gemini 安装 `/memory` 命令，并创建共享的 `~/.agents/memory/` 存储。
+
+**按项目（仅本仓库）：** 将 `.agents/skills/ai-memory-system` 复制到你的智能体的技能目录——所有路径见 `AGENTS.md` §3。
+
+**斜杠命令：**
+
+- `/memory` → 回忆（项目 + 全局）
+- `/memory save <描述>` → 持久化（路由到项目或全局）
 
 **安装后验证：**
 
 ```bash
-bash .opencode/skills/ai-memory-system/scripts/validate-memory.sh --root .
-# ✅ memory/ and index.md exist
+bash $SKILL_DIR/scripts/validate-memory.sh --root .                  # project memory
+bash $SKILL_DIR/scripts/validate-memory.sh --memdir ~/.agents/memory # global memory
 # ✅ memory system is valid
 ```
 
-安装后，智能体会通过 `skill` 工具自动发现它：
-
-```
-skill({ name: "ai-memory-system" })
-```
-
-> 该技能将完整的 [`memory.md`](./memory.md) 规范封装为 回忆 → 行动 → 持久化 工作流，并附带模板和验证。
+> 该技能将完整的 [`memory.md`](./memory.md) 规范封装为 回忆 → 行动 → 持久化 工作流，并附带模板和验证。智能体说明：[`AGENTS.md`](./AGENTS.md)。
 
 ---
 
