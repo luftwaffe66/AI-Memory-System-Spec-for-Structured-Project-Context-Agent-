@@ -12,6 +12,10 @@
 📖 Full normative spec → [`memory.md`](./memory.md)
 ⚡ Reusable agent skill → [`.opencode/skills/ai-memory-system/SKILL.md`](./.opencode/skills/ai-memory-system/SKILL.md)
 
+<!-- README-I18N:START -->
+**English** | [Español](./README.es.md) | [Português](./README.pt.md) | [Français](./README.fr.md) | [Deutsch](./README.de.md) | [简体中文](./README.zh.md) | [日本語](./README.ja.md) | [한국어](./README.ko.md) | [Русский](./README.ru.md) | [العربية](./README.ar.md)
+<!-- README-I18N:END -->
+
 ---
 
 ## 📑 Table of Contents
