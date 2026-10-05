@@ -7,6 +7,10 @@
 [![Enforcement](https://img.shields.io/badge/enforcement-strict-critical?style=for-the-badge)](#-durchsetzungsregel)
 [![License](https://img.shields.io/badge/license-use_freely-green?style=for-the-badge)](#-ziel)
 
+<p align="center">
+  <img src="https://i.ibb.co/99zNQ9BM/file-000000001cdc81f8aa9850634e3760de.png" alt="AI Memory System Preview" width="100%" />
+</p>
+
 **Verliere keinen Kontext mehr zwischen KI-Sitzungen.** Dieses Repo definiert eine deterministische, prüfbare Langzeit-Memory-Schicht auf Basis eines `/memory/`-Verzeichnisses mit indexierten, zeitgestempelten Markdown-Dateien — plus einem geteilten **globalen Memory** (`~/.agents/memory/`), das dich durch jedes Projekt, Repo und jede Sitzung begleitet.
 
 📖 Vollständige normative Spezifikation → [`memory.md`](./memory.md)

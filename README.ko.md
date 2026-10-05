@@ -7,6 +7,10 @@
 [![Enforcement](https://img.shields.io/badge/enforcement-strict-critical?style=for-the-badge)](#-강제-규칙)
 [![License](https://img.shields.io/badge/license-use_freely-green?style=for-the-badge)](#-목표)
 
+<p align="center">
+  <img src="https://i.ibb.co/99zNQ9BM/file-000000001cdc81f8aa9850634e3760de.png" alt="AI Memory System Preview" width="100%" />
+</p>
+
 **AI 세션 사이에 컨텍스트를 잃지 마세요.** 이 저장소는 인덱싱되고 타임스탬프가 있는 Markdown 파일들로 구성된 `/memory/` 디렉토리 기반의 결정적이고 감사 가능한 장기 메모리 계층을 정의합니다. 여기에 모든 프로젝트·저장소·세션에서 함께 하는 공유 **글로벌 메모리**(`~/.agents/memory/`)가 더해집니다.
 
 📖 전체 규범 명세 → [`memory.md`](./memory.md)

@@ -7,6 +7,10 @@
 [![Enforcement](https://img.shields.io/badge/enforcement-strict-critical?style=for-the-badge)](#-enforcement-rule)
 [![License](https://img.shields.io/badge/license-use_freely-green?style=for-the-badge)](#-goal)
 
+<p align="center">
+  <img src="https://i.ibb.co/99zNQ9BM/file-000000001cdc81f8aa9850634e3760de.png" alt="AI Memory System Preview" width="100%" />
+</p>
+
 **Stop losing context between AI sessions.** This repo defines a deterministic, auditable long-term memory layer based on a `/memory/` directory with indexed, timestamped Markdown files — plus a shared **global memory** (`~/.agents/memory/`) that follows you across every project, repo, and session.
 
 📖 Full normative spec → [`memory.md`](./memory.md)

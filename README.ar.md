@@ -7,6 +7,10 @@
 [![Enforcement](https://img.shields.io/badge/enforcement-strict-critical?style=for-the-badge)](#-قاعدة-التنفيذ)
 [![License](https://img.shields.io/badge/license-use_freely-green?style=for-the-badge)](#-الهدف)
 
+<p align="center">
+  <img src="https://i.ibb.co/99zNQ9BM/file-000000001cdc81f8aa9850634e3760de.png" alt="AI Memory System Preview" width="100%" />
+</p>
+
 **توقف عن فقدان السياق بين جلسات الذكاء الاصطناعي.** يحدد هذا المستودع طبقة ذاكرة طويلة الأمد حتمية وقابلة للتدقيق، مبنية على مجلد `/memory/` مع ملفات Markdown مفهرسة وتحمل طوابع زمنية — بالإضافة إلى **ذاكرة عالمية** مشتركة (`~/.agents/memory/`) ترافقك في كل مشروع ومستودع وجلسة.
 
 📖 المواصفة المعيارية الكاملة → [`memory.md`](./memory.md)

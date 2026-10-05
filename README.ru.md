@@ -7,6 +7,10 @@
 [![Enforcement](https://img.shields.io/badge/enforcement-strict-critical?style=for-the-badge)](#-правило-исполнения)
 [![License](https://img.shields.io/badge/license-use_freely-green?style=for-the-badge)](#-цель)
 
+<p align="center">
+  <img src="https://i.ibb.co/99zNQ9BM/file-000000001cdc81f8aa9850634e3760de.png" alt="AI Memory System Preview" width="100%" />
+</p>
+
 **Хватит терять контекст между сессиями ИИ.** Этот репозиторий определяет детерминированный, аудируемый слой долговременной памяти на основе директории `/memory/` с индексированными Markdown-файлами с временными метками — плюс общую **глобальную память** (`~/.agents/memory/`), которая следует за вами в каждом проекте, репозитории и сессии.
 
 📖 Полная нормативная спецификация → [`memory.md`](./memory.md)

@@ -7,6 +7,10 @@
 [![Enforcement](https://img.shields.io/badge/enforcement-strict-critical?style=for-the-badge)](#-regra-de-cumprimento)
 [![License](https://img.shields.io/badge/license-use_freely-green?style=for-the-badge)](#-objetivo)
 
+<p align="center">
+  <img src="https://i.ibb.co/99zNQ9BM/file-000000001cdc81f8aa9850634e3760de.png" alt="AI Memory System Preview" width="100%" />
+</p>
+
 **Pare de perder contexto entre sessões de IA.** Este repo define uma camada de memória determinística, auditável e de longo prazo baseada em um diretório `/memory/` com arquivos Markdown indexados e com marcação de tempo — mais uma **memória global** compartilhada (`~/.agents/memory/`) que acompanha você em cada projeto, repo e sessão.
 
 📖 Especificação normativa completa → [`memory.md`](./memory.md)

@@ -7,6 +7,10 @@
 [![Enforcement](https://img.shields.io/badge/enforcement-strict-critical?style=for-the-badge)](#-強制ルール)
 [![License](https://img.shields.io/badge/license-use_freely-green?style=for-the-badge)](#-ゴール)
 
+<p align="center">
+  <img src="https://i.ibb.co/99zNQ9BM/file-000000001cdc81f8aa9850634e3760de.png" alt="AI Memory System Preview" width="100%" />
+</p>
+
 **AI セッション間でコンテキストを失うのはもう終わりに。** このリポジトリは、インデックス付き・タイムスタンプ付き Markdown ファイルによる `/memory/` ディレクトリを基盤とした、決定論的で監査可能な長期メモリ層を定義します——さらに、すべてのプロジェクト・リポジトリ・セッションで使える共有**グローバルメモリ**（`~/.agents/memory/`）付きです。
 
 📖 完全な規範仕様 → [`memory.md`](./memory.md)

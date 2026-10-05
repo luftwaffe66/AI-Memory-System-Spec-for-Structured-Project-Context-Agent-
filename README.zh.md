@@ -7,6 +7,10 @@
 [![Enforcement](https://img.shields.io/badge/enforcement-strict-critical?style=for-the-badge)](#-执行规则)
 [![License](https://img.shields.io/badge/license-use_freely-green?style=for-the-badge)](#-目标)
 
+<p align="center">
+  <img src="https://i.ibb.co/99zNQ9BM/file-000000001cdc81f8aa9850634e3760de.png" alt="AI Memory System Preview" width="100%" />
+</p>
+
 **不再在 AI 会话之间丢失上下文。** 本仓库基于 `/memory/` 目录，通过带索引、带时间戳的 Markdown 文件，定义了一个确定性的、可审计的长期记忆层——外加一个共享的**全局记忆**（`~/.agents/memory/`），在每个项目、仓库和会话中跟随你。
 
 📖 完整规范 → [`memory.md`](./memory.md)
