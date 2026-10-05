@@ -44,11 +44,19 @@ You are the **project long-term memory manager**. Your job is to give the agent 
 ### 1. Recall (at task start)
 
 ```
-1. If memory/index.md exists → Read it
-2. Identify entries relevant to current task scope
-3. Read only those memory files (don't load everything)
-4. If memory/ doesn't exist → continue task, create it later if needed
+1. Read PROJECT memory: ./memory/index.md (if exists)
+2. Read GLOBAL memory: ~/.agents/memory/index.md (shared across ALL projects/repos)
+3. Identify entries relevant to current task scope (both sources)
+4. Read only those memory files (don't load everything)
+5. Tip: bash $SKILL_DIR/scripts/search-memory.sh <keyword> --root . searches both
 ```
+
+Two memory layers:
+
+| Layer | Location | Contains |
+|-------|----------|----------|
+| 📁 PROJECT | `./memory/` in current repo | Repo-specific: architecture, refactors, bugs of THIS project |
+| 🌍 GLOBAL | `~/.agents/memory/` | Cross-project: reusable decisions, patterns, user preferences, learnings useful in ANY repo |
 
 ### 2. Act (during task)
 
@@ -61,9 +69,14 @@ Evaluate → Create → Sync → Verify. If skipped, the task is **incomplete**.
 
 **Step 1 — Evaluate:** Does the task match "When to use me" above? If no, stop.
 
-**Step 2 — Create file:** `memory/YYYY-MM-DD_HH-MM_<slug>.md`
+**Step 2 — Create file:** project `memory/YYYY-MM-DD_HH-MM_<slug>.md` or global `~/.agents/memory/YYYY-MM-DD_HH-MM_<slug>.md`
+- Routing (where to save):
+  - 📁 PROJECT (`./memory/`): repo-specific changes — this repo's architecture, refactors, bugs, DB
+  - 🌍 GLOBAL (`~/.agents/memory/`): reusable knowledge — patterns, conventions, decisions, preferences, learnings that apply to OTHER projects too
+  - When in doubt: save in PROJECT. Promote to GLOBAL only if a future session in another repo would benefit.
 - Fastest way (recommended): `bash scripts/new-memory.sh --slug <kebab> --type <type> --scope <module> --title "<Title>" --tags <a,b> --template <memory|decision|bug|refactor>`
-  - Auto-fills date/time, scaffolds from the right template, and syncs `index.md`
+  - Add `--global` to save in `~/.agents/memory/` instead of `./memory/`
+  - Auto-fills date/time, scaffolds from the right template, and syncs the right `index.md`
 - Manual fallback:
   - Date/time = now, in 24h local time (e.g. `2026-10-04_22-31_auth-refactor.md`)
   - Slug = kebab-case, short, descriptive (`auth-jwt-migration`, `db-schema-v2`)
@@ -72,7 +85,9 @@ Evaluate → Create → Sync → Verify. If skipped, the task is **incomplete**.
 - Forbidden: empty text, placeholders, `TBD`, `later`, `pending` without context
 - Everything must be concrete, verifiable, useful for debugging/audit
 
-**Step 3 — Sync `memory/index.md`:**
+**Step 3 — Sync the index:**
+- Project: `./memory/index.md` · Global: `~/.agents/memory/index.md` (whichever layer you saved to)
+- Format (descending, most recent first, no duplicates):
 - Format (descending, most recent first, no duplicates):
 ```md
 # MEMORY INDEX
@@ -84,7 +99,7 @@ Evaluate → Create → Sync → Verify. If skipped, the task is **incomplete**.
 - Every entry must point to a real file. Full example in `references/index-template.md`.
 
 **Step 4 — Verify:**
-- Run `bash scripts/validate-memory.sh --root .` (strict mode is ON by default):
+- Run `bash scripts/validate-memory.sh --root .` for project memory, or `bash scripts/validate-memory.sh --memdir ~/.agents/memory` for global memory (strict mode ON by default):
   - `memory/index.md` exists and is sorted descending
   - no duplicates, no dead links, no orphans
   - filenames match `^[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}-[0-9]{2}_[a-z0-9-]+\.md$` with valid date/time
@@ -99,18 +114,30 @@ Evaluate → Create → Sync → Verify. If skipped, the task is **incomplete**.
 ## Base structure
 
 ```
-memory/
-├── index.md                              ← global index (source of truth, mandatory)
-├── 2026-10-04_22-31_auth-refactor.md
-└── 2026-10-05_09-15_db-schema-v2.md
+<project>/
+└── memory/                               ← PROJECT layer (per repo)
+    ├── index.md                          ← project index (source of truth, mandatory)
+    ├── 2026-10-04_22-31_auth-refactor.md
+    └── 2026-10-05_09-15_db-schema-v2.md
+
+~/.agents/
+└── memory/                               ← GLOBAL layer (shared, all repos)
+    ├── index.md                          ← global index (# GLOBAL MEMORY INDEX)
+    └── 2026-10-05_11-00_editorial-style.md
 ```
 
-If `memory/` doesn't exist:
+If `./memory/` doesn't exist:
 ```bash
 mkdir -p memory
 cat > memory/index.md << 'EOF'
 # MEMORY INDEX
 EOF
+```
+
+If `~/.agents/memory/` doesn't exist (created by `install-global.sh`, or manually):
+```bash
+mkdir -p ~/.agents/memory
+printf '# GLOBAL MEMORY INDEX\n' > ~/.agents/memory/index.md
 ```
 
 ## Memory file template (summary)

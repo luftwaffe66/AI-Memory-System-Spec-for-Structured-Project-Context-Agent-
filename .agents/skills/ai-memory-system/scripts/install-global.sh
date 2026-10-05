@@ -56,6 +56,13 @@ install_file "$OPENCODE_CMD" "$HOME/.config/opencode/commands/memory.md"  # Open
 install_file "$CLAUDE_CMD" "$HOME/.claude/commands/memory.md"              # Claude Code: /memory
 install_file "$GEMINI_CMD" "$HOME/.gemini/commands/memory.toml"             # Gemini CLI: /memory
 
+# Shared cross-project memory (GLOBAL layer, all repos/sessions)
+mkdir -p "$HOME/.agents/memory"
+if [[ ! -f "$HOME/.agents/memory/index.md" ]]; then
+  printf '# GLOBAL MEMORY INDEX\n' > "$HOME/.agents/memory/index.md"
+  echo "✅ global memory → $HOME/.agents/memory/index.md"
+fi
+
 echo ""
 echo "Done. Restart your agent, then type /memory anywhere."
 echo "Verify: ls ~/.agents/skills/ai-memory-system ~/.claude/skills/ai-memory-system ~/.gemini/skills/ai-memory-system ~/.config/opencode/skills/ai-memory-system"

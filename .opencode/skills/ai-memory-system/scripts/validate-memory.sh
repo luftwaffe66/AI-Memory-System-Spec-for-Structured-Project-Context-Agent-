@@ -1,19 +1,24 @@
 #!/usr/bin/env bash
 # Validate AI Memory System integrity: index sync, naming, structure, line limit.
-# Usage: bash scripts/validate-memory.sh [--root DIR] [--strict]  (default DIR=., strict on)
+# Usage: bash scripts/validate-memory.sh [--root DIR] [--memdir DIR] [--no-strict]
+#   --root DIR   : project root (validates DIR/memory) — default .
+#   --memdir DIR : memory dir directly (e.g. ~/.agents/memory for GLOBAL layer)
 set -euo pipefail
 
 ROOT="."
+MEMDIR=""
 STRICT=1
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --root) ROOT="$2"; shift 2 ;;
+    --memdir) MEMDIR="$2"; shift 2 ;;
     --no-strict) STRICT=0; shift ;;
     *) echo "Unknown arg: $1" >&2; exit 2 ;;
   esac
 done
 
 MEM="$ROOT/memory"
+[[ -n "$MEMDIR" ]] && MEM="$MEMDIR"
 IDX="$MEM/index.md"
 FAIL=0
 WARN=0
@@ -26,11 +31,16 @@ ok()  { echo "✅ $*"; }
 [[ -f "$IDX" ]] || { err "missing index: $IDX"; exit 1; }
 ok "memory/ and index.md exist"
 
-# 1. Dead links: every ./memory/*.md referenced in index must exist
+# 1. Dead links: every *.md referenced in index must exist
+# (project refs look like ./memory/<file>.md, global refs like ./<file>.md)
 while IFS= read -r ref; do
-  target="$ROOT/${ref#./}"
+  if [[ "$ref" == ./memory/* ]]; then
+    target="$ROOT/${ref#./}"
+  else
+    target="$MEM/${ref#./}"
+  fi
   [[ -f "$target" ]] || err "dead link in index.md: $ref"
-done < <(grep -oE '\./memory/[A-Za-z0-9._-]+\.md' "$IDX" || true)
+done < <(grep -oE '\./[A-Za-z0-9._/-]+\.md' "$IDX" || true)
 
 # 2. Orphans: every memory/*.md (except index) must be referenced
 while IFS= read -r f; do
@@ -63,7 +73,7 @@ while IFS= read -r f; do
 done < <(find "$MEM" -maxdepth 1 -name '*.md' ! -name 'index.md' | sort)
 
 # 5. Duplicates in index
-dupes=$(grep -oE '\./memory/[A-Za-z0-9._-]+\.md' "$IDX" | sort | uniq -d || true)
+dupes=$(grep -oE '\./[A-Za-z0-9._/-]+\.md' "$IDX" | sort | uniq -d || true)
 [[ -n "$dupes" ]] && err "duplicate entries in index.md: $dupes"
 
 # 6. Descending date order (## YYYY-MM-DD headers)

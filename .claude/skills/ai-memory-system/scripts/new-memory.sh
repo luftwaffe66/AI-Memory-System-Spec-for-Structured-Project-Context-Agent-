@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 # Scaffold a new memory file from template + sync index.md.
 # Usage:
-#   bash scripts/new-memory.sh --slug auth-jwt --type refactor --scope auth/ --title "Auth Refactor to JWT" [--tags auth,jwt] [--template memory|decision|bug|refactor] [--root DIR]
+#   bash scripts/new-memory.sh --slug auth-jwt --type refactor --scope auth/ --title "Auth Refactor to JWT" [--tags auth,jwt] [--template memory|decision|bug|refactor] [--root DIR] [--global] [--global-dir DIR]
+#   --global writes to the shared cross-project memory (default: ~/.agents/memory).
 set -euo pipefail
 
 SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 ROOT="."
+GLOBAL=0
+GLOBAL_DIR="$HOME/.agents/memory"
 SLUG=""; TYPE=""; SCOPE=""; TITLE=""; TAGS=""; TEMPLATE="memory"
 
 while [[ $# -gt 0 ]]; do
@@ -17,12 +20,14 @@ while [[ $# -gt 0 ]]; do
     --tags) TAGS="$2"; shift 2 ;;
     --template) TEMPLATE="$2"; shift 2 ;;
     --root) ROOT="$2"; shift 2 ;;
+    --global) GLOBAL=1; shift ;;
+    --global-dir) GLOBAL_DIR="$2"; shift 2 ;;
     *) echo "Unknown arg: $1" >&2; exit 2 ;;
   esac
 done
 
 [[ -n "$SLUG" && -n "$TYPE" && -n "$SCOPE" && -n "$TITLE" ]] || {
-  echo "Usage: new-memory.sh --slug <kebab> --type <feature|fix|refactor|decision|bug|infra> --scope <module> --title \"<Title>\" [--tags a,b] [--template memory|decision|bug|refactor] [--root DIR]" >&2
+  echo "Usage: new-memory.sh --slug <kebab> --type <feature|fix|refactor|decision|bug|infra> --scope <module> --title \"<Title>\" [--tags a,b] [--template memory|decision|bug|refactor] [--root DIR] [--global]" >&2
   exit 2
 }
 
@@ -32,12 +37,22 @@ case "$TYPE" in
 esac
 
 DATE="$(date +%F)"; HM="$(date +%H-%M)"; HMC="$(date +%H:%M)"
-FILE="$ROOT/memory/${DATE}_${HM}_${SLUG}.md"
+MEMDIR="$ROOT/memory"
+LINK_PREFIX="./memory"
+if (( GLOBAL == 1 )); then
+  MEMDIR="$GLOBAL_DIR"
+  LINK_PREFIX="."
+fi
+FILE="$MEMDIR/${DATE}_${HM}_${SLUG}.md"
 TPL="$SKILL_DIR/references/${TEMPLATE}-template.md"
 [[ -f "$TPL" ]] || TPL="$SKILL_DIR/references/memory-template.md"
 
-mkdir -p "$ROOT/memory"
-[[ -f "$ROOT/memory/index.md" ]] || printf '# MEMORY INDEX\n' > "$ROOT/memory/index.md"
+mkdir -p "$MEMDIR"
+if (( GLOBAL == 1 )); then
+  [[ -f "$MEMDIR/index.md" ]] || printf '# GLOBAL MEMORY INDEX\n' > "$MEMDIR/index.md"
+else
+  [[ -f "$MEMDIR/index.md" ]] || printf '# MEMORY INDEX\n' > "$MEMDIR/index.md"
+fi
 
 # Fill template placeholders
 sed -e "s|<Clear Title>|$TITLE|" \
@@ -56,16 +71,16 @@ sed -e "s|<Clear Title>|$TITLE|" \
     "$TPL" > "$FILE"
 
 # Prepend entry under today's date header in index.md
-ENTRY="- $HMC — $TITLE → ./memory/$(basename "$FILE")"
-if grep -q "^## $DATE" "$ROOT/memory/index.md"; then
+ENTRY="- $HMC — $TITLE → $LINK_PREFIX/$(basename "$FILE")"
+if grep -q "^## $DATE" "$MEMDIR/index.md"; then
   awk -v entry="$ENTRY" -v date="## $DATE" '
     $0 == date { print; print entry; next } { print }
-  ' "$ROOT/memory/index.md" > "$ROOT/memory/index.md.tmp" && mv "$ROOT/memory/index.md.tmp" "$ROOT/memory/index.md"
+  ' "$MEMDIR/index.md" > "$MEMDIR/index.md.tmp" && mv "$MEMDIR/index.md.tmp" "$MEMDIR/index.md"
 else
   # Insert new date section after "# MEMORY INDEX" (keeps descending if created now)
   awk -v entry="$ENTRY" -v date="## $DATE" '
     NR==1 { print; print ""; print date; print ""; print entry; next } { print }
-  ' "$ROOT/memory/index.md" > "$ROOT/memory/index.md.tmp" && mv "$ROOT/memory/index.md.tmp" "$ROOT/memory/index.md"
+  ' "$MEMDIR/index.md" > "$MEMDIR/index.md.tmp" && mv "$MEMDIR/index.md.tmp" "$MEMDIR/index.md"
 fi
 
 echo "✅ created: $FILE"
