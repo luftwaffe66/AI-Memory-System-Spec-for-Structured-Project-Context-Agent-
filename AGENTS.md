@@ -13,6 +13,7 @@ skill({ name: "ai-memory-system" })
 Full definition: `.opencode/skills/ai-memory-system/SKILL.md`
 Normative spec: `memory.md`
 Human overview: `README.md`
+Shortcut in OpenCode TUI: `/memory` (see `.opencode/commands/memory.md`) — `/memory` recalls, `/memory save <desc>` persists.
 
 ## 2. Mandatory workflow: Recall → Act → Persist
 
